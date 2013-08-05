@@ -7,7 +7,7 @@ public class C100GameCore {
 		
 		
 	}
-	
+
 	public void finalize()
 	{
 		
