@@ -1,4 +1,4 @@
-package com.simonsgames.game100;
+package com.smfandroid.game100;
 
 import java.util.LinkedList;
 import java.util.List;

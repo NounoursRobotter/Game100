@@ -1,4 +1,4 @@
-package com.simonsgames.game100;
+package com.smfandroid.game100;
 
 import android.os.Bundle;
 import android.app.Activity;
