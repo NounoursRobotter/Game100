@@ -22,12 +22,20 @@
         android:layout_height="wrap_content" >
 
         <Button
-            android:id="@+id/button3"
+            android:id="@+id/bt_reset"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="ResetClicked"
-            android:text="Reset" />
+            android:onClick="resetClicked"
+            android:text="@string/bt_reset" />
+
+        <Button
+            android:id="@+id/bt_pop"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="popClicked"
+            android:text="@string/bt_pop" />
     </LinearLayout>
 
 </LinearLayout>

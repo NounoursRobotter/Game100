@@ -118,7 +118,11 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 	
 	protected void setValueAt(Point position, int value) {
 		LinearLayout l = (LinearLayout)getChildAt(position.y);
-		((GridElement)l.getChildAt(position.x)).setValue(value);
+		GridElement gridE = (GridElement)l.getChildAt(position.x);
+		if(value == EMPTY_VALUE)
+			gridE.setEmptyValue();
+		else
+			gridE.setValue(value);
 	}
 	
 	private void redrawValues() {
@@ -129,6 +133,11 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 		}
 	}
 
+	public void popLastMove() {
+		Point lastPoint = mGameCore.PopMove();
+		setValueAt(lastPoint, EMPTY_VALUE);
+	}
+	
 	public void nextPointSelected(Point p) {
 		Point oldPoint, newPoint;
 		LinkedList<Point> lMoves = mGameCore.GetState();
@@ -161,26 +170,8 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 		this.setBackgroundColor(Color.BLACK);
 		setSize(10, 10);		
 		setOnTouchListener(this);
-
+		reset();
 	}
-
-	public GameGrid(Context context, int nbRows, int nbColumns) {
-		super(context);
-		this.setBackgroundColor(Color.BLACK);
-		setSize(nbRows, nbColumns);	
-		setOnTouchListener(this);
-
-	}
-
-	public GameGrid(Context context) {
-		super(context);
-		setBackgroundColor(Color.BLACK);
-
-		setSize(10, 10);
-		setOnTouchListener(this);
-
-	}
-
 
 	@Override
 	public boolean onTouch(View arg0, MotionEvent event) {
@@ -230,14 +221,14 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 				// Diagonals
 			} else if(x > 0) { // X > 0
 			if(y > 0)
-				nextPoint = new Point(1,-1);
-			else
 				nextPoint = new Point(1,1);
+			else
+				nextPoint = new Point(1,-1);
 			} else             // X < 0
 				if (y > 0)
-					nextPoint = new Point(-1,-1);
-				else
 					nextPoint = new Point(-1,1);
+				else
+					nextPoint = new Point(-1,-1);
 			nextPointSelected(nextPoint);
 		case MotionEvent.ACTION_CANCEL:
 			// Return a VelocityTracker object back to be re-used by others.
@@ -246,5 +237,7 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 		}
 		return true;
 	}
+
+
 	
 }
