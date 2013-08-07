@@ -4,6 +4,7 @@
     <string name="app_name">Game100</string>
     <string name="action_settings">Settings</string>
     <string name="bt_reset">Reset</string>
+    <string name="bt_pop">Revert last move</string>
     <string name="msg_illegal_move">Illegal Move</string>
 
 </resources>

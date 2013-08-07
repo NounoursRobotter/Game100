@@ -16,12 +16,18 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 	}
 
-	public void ResetClicked(View origin) {
+	public void resetClicked(View origin) {
 		Log.i(TAG, "Reset");
 		GameGrid gmg = (GameGrid)findViewById(R.id.game_grid);
 		gmg.reset();
 	}
 
+	public void popClicked(View origin) {
+		Log.i(TAG, "Pop");
+		GameGrid gmg = (GameGrid)findViewById(R.id.game_grid);
+		gmg.popLastMove();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
