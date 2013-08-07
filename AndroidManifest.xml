@@ -21,6 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <uses-library android:required="true" android:name="android.test.runner"/>
     </application>
+
+<instrumentation android:name="android.test.InstrumentationTestRunner"
+       android:targetPackage="com.smfandroid.game100" android:label="testClassC100GameCore" android:functionalTest="true" android:handleProfiling="true"/>
 
 </manifest>
