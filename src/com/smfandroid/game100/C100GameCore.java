@@ -118,43 +118,39 @@ public class C100GameCore
 	
 	public boolean SetState(List<Point> moves) // Set the current state of the game (the length of the table is the played moves) - for loading purposes
 	{
-		return true;
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
 	public List<Point> GetASolution() // if the number of free places is not too high, get a solution (gives size*size elements, 0 element if no solution found)
 	{
-		return  new LinkedList<Point>();
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
 	public List<Point> TrySolutions() // randomly try to fill the grid (gives size*size elements, 0 element if no solution found)
     {
-		return new LinkedList<Point>();
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
 	/* Voided areas */
 	public boolean SetNewVoidPlace(Point places) // void a place in the grid
     {
-		return true;
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
 	public boolean CancelVoidPlace(Point places) // cancel a voided place in the grid
     {
-		return true;
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
 	public List<Point> GetVoidPlaces() // Get the list of canceled places - for loading purposes
     {
-		return new LinkedList<Point>();
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
 	
 	/* Multiplayer get score */
 	public float[] GetScore_2p()
     {
-		float score[]=new float[2];
-		score[0]=0.5f;
-		score[1]=0.0f;
-		
-		return score;
+		throw new UnsupportedOperationException("Not implemented yet");
 	}
 }
