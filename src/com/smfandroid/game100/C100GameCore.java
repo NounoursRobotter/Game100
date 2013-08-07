@@ -1,5 +1,6 @@
 package com.smfandroid.game100;
 
+import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
@@ -9,6 +10,15 @@ import android.graphics.Point;
 
 public class C100GameCore
 {
+	public class IllegalMoveException extends RuntimeException {
+		private static final long serialVersionUID = 1L; 
+	}
+	
+	public class OutsideBoardPositionException extends RuntimeException {
+		private static final long serialVersionUID = 1L; 
+	}
+	
+	
 	private static int MAX_SIZE=25;
 	private static int NOT_PLAYED=-1;
 	private static int NOT_VOIDED=-2;
@@ -80,17 +90,33 @@ public class C100GameCore
 		
 		return possibleMoves;
 	}
+
+	public boolean isAllowedAsNextMove(Point position) {		
+		boolean ret = true;
+		if (board[position.x][position.y]!=NOT_PLAYED) 
+			ret = false;
+		return ret;
+
+	}
+
+	private boolean isInsideBoardGame(Point position) {
+		boolean ret = true;
+		if ((position.x<0)||(position.y<0))
+			ret = false;
+		if((position.x>=boardSize.x)||(position.y>=boardSize.y)) 
+			ret = false;	
+		return ret;
+	}
 	
-	public boolean PushMove(Point position) // Play a move
+	
+	public void PushMove(Point position) // Play a move
 	{
-		if ((position.x<0)||(position.y<0)||(position.x>=boardSize.x)||(position.y>=boardSize.y)) return false;
-		if (board[position.x][position.y]!=NOT_PLAYED) return false;
+		if( ! isAllowedAsNextMove(position)) throw new IllegalMoveException();
+		if( ! isInsideBoardGame(position)) throw new OutsideBoardPositionException();
 		
 		board[position.x][position.y]=nextNum;
 		nextNum++;
 		playedMoves.add(position);
-		
-		return true;
 	}
 	
 	public boolean isWon() // Did the player win?
@@ -101,9 +127,10 @@ public class C100GameCore
 	
 	public Point PopMove() // Cancel the last move
 	{
+		
 		if (nextNum<3)
 		{
-			return new Point(-1,-1);
+			throw new EmptyStackException();
 		}
 		Point lastPlayed=playedMoves.remove(nextNum-2);
 		nextNum--;
