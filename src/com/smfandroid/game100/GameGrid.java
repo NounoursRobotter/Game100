@@ -1,5 +1,6 @@
 package com.smfandroid.game100;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
@@ -129,11 +130,12 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 	}
 
 	public void nextPointSelected(Point p) {
-		Point newPoint;
-		List<Point> lMoves = mGameCore.GetState();
-		newPoint = lMoves.get(lMoves.size()-1);
-		newPoint.x += p.x;
-		newPoint.y += p.y;
+		Point oldPoint, newPoint;
+		LinkedList<Point> lMoves = mGameCore.GetState();
+		oldPoint = lMoves.getLast();
+		newPoint = new Point();
+		newPoint.x =  oldPoint.x + p.x;
+		newPoint.y += oldPoint.y + p.y;
 		try {
 			mGameCore.PushMove(newPoint);
 			redrawValues();

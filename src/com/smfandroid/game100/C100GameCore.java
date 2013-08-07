@@ -24,15 +24,12 @@ public class C100GameCore
 	private static final int NOT_PLAYED=-1;
 	private static final int VOIDED_PLACE=-2;
 	
-	public static final int ALLOWED_OK=0;
-	public static final int ALLOWED_OUTOFBOUND=1;
-	public static final int ALLOWED_OCCUPIED=2;
-	public static final int ALLOWED_SEERULES=3;
+	private enum MoveStatus { ALLOWED_OUTOFBOUND, ALLOWED_OCCUPIED, ALLOWED_SEERULES, ALLOWED_OK };
 	
 	private int board[][];
 	private int nextNum;
 	private int gameStyle; 
-	private List<Point> playedMoves;
+	private LinkedList<Point> playedMoves;
 	private List<Point> voidedPlaces;
 	private Point boardSize;
 	
@@ -70,7 +67,7 @@ public class C100GameCore
 		
 		playedMoves = new LinkedList<Point>();
 		//if ((startPoint.x>=0)&&(startPoint.x<boardSize.x)&&(startPoint.y>=0)&&(startPoint.y<boardSize.y))
-		if (isAllowedAsNextMove(startPoint,false)==ALLOWED_OK)
+		if (isAllowedAsNextMove(startPoint,false)==MoveStatus.ALLOWED_OK)
 		{
 			board[startPoint.x][startPoint.y]=1;
 			playedMoves.add(startPoint);
@@ -84,7 +81,7 @@ public class C100GameCore
 		
 	}
 	
-	public Vector<Point> PossibleMoves() // Get the list of possible moves
+	public List<Point> PossibleMoves() // Get the list of possible moves
 	{
 		Vector<Point> possibleMoves = new Vector<Point>();
 		Point lastPoint=playedMoves.get(nextNum-2);
@@ -102,28 +99,33 @@ public class C100GameCore
 		return possibleMoves;
 	}
 
-	public int isAllowedAsNextMove(Point position, boolean checkIfInPossibleMoves) {		
-		if ((position.x<0)||(position.y<0)||(position.x>=boardSize.x)||(position.y>=boardSize.y)) return ALLOWED_OUTOFBOUND;
-		if (board[position.x][position.y]!=NOT_PLAYED) return ALLOWED_OCCUPIED;
+	
+	public MoveStatus isAllowedAsNextMove(Point position, boolean checkIfInPossibleMoves) {		
+		if (
+				(position.x<0)||(position.y<0) ||
+				(position.x>=boardSize.x)||(position.y>=boardSize.y)
+			) return MoveStatus.ALLOWED_OUTOFBOUND;
+		
+		if (board[position.x][position.y]!=NOT_PLAYED) return MoveStatus.ALLOWED_OCCUPIED;
 		
 		// if is in possible moves list 
 		if (checkIfInPossibleMoves)
 		{
-			Vector<Point> allowedMoves = PossibleMoves();
-			if (!allowedMoves.contains(position)) return ALLOWED_SEERULES;
+			List<Point> allowedMoves = PossibleMoves();
+			if (!allowedMoves.contains(position)) return MoveStatus.ALLOWED_SEERULES;
 		}
 		
-		return ALLOWED_OK;
+		return MoveStatus.ALLOWED_OK;
 
 	}
 	
 	public void PushMove(Point position) // Play a move
 	{
-		int allowedStatus=isAllowedAsNextMove(position,true);
+		MoveStatus allowedStatus=isAllowedAsNextMove(position,true);
 		
-		if( allowedStatus==ALLOWED_OUTOFBOUND) throw new IllegalMoveException("Out of bound");
-		if( allowedStatus==ALLOWED_OCCUPIED) throw new IllegalMoveException("Occuped place");
-		if( allowedStatus==ALLOWED_SEERULES) throw new IllegalMoveException("Illegal move");
+		if( allowedStatus == MoveStatus.ALLOWED_OUTOFBOUND) throw new IllegalMoveException("Out of bound");
+		if( allowedStatus == MoveStatus.ALLOWED_OCCUPIED) throw new IllegalMoveException("Occuped place");
+		if( allowedStatus == MoveStatus.ALLOWED_SEERULES) throw new IllegalMoveException("Illegal move");
 		
 		board[position.x][position.y]=nextNum;
 		nextNum++;
@@ -149,7 +151,7 @@ public class C100GameCore
 		return lastPlayed;
 	}
 	
-	public List<Point> GetState() // Get the current state of the game  - for saving purposes
+	public LinkedList<Point> GetState() // Get the current state of the game  - for saving purposes
 	{
 		return playedMoves;
 	}
