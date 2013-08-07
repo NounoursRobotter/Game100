@@ -34,6 +34,12 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 			mValue = -1;
 			updateValue();
 		}
+
+		public void setPossibleValue() {
+			mValue = -2;
+			updateValue();
+		}
+		
 		public void setValue(int value) {
 			if(value <=0)
 				throw new IllegalArgumentException("The value is a stricly positive integer");
@@ -47,6 +53,10 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 				setText(Integer.toString(mValue));
 			else
 				setText(" ");
+			if(mValue == -2)
+				setBackgroundColor(Color.GREEN);
+			else
+				setBackgroundColor(Color.WHITE);
 		}
 		
 		public GridElement(Context context) {
@@ -100,14 +110,10 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 	}
 
 	public final int EMPTY_VALUE = -1;
-	
+	public final int POSSIBLE_VALUE = -2;
+
+
 	public void reset() {
-		for(int i = 0; i < getChildCount(); i++) {
-			LinearLayout l = (LinearLayout)getChildAt(i);
-			for(int j = 0; j< l.getChildCount(); j++) {
-				((GridElement)l.getChildAt(j)).setEmptyValue();
-			}
-		}
 		Point initPoint = new Point();
 		initPoint.x = mRndGenerator.nextInt(mNbColumns);
 		initPoint.y = mRndGenerator.nextInt(mNbRows);
@@ -121,21 +127,32 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 		GridElement gridE = (GridElement)l.getChildAt(position.x);
 		if(value == EMPTY_VALUE)
 			gridE.setEmptyValue();
-		else
+		else if(value == POSSIBLE_VALUE)
+			gridE.setPossibleValue();
+		else			
 			gridE.setValue(value);
 	}
 	
 	private void redrawValues() {
+		for(int i = 0; i < getChildCount(); i++) {
+			LinearLayout l = (LinearLayout)getChildAt(i);
+			for(int j = 0; j< l.getChildCount(); j++) {
+				((GridElement)l.getChildAt(j)).setEmptyValue();
+			}
+		}
 		int val = 0;
 		for(Point p:mGameCore.GetState()) {
 			val += 1; 
 			setValueAt(p, val);
 		}
+		for(Point p:mGameCore.PossibleMoves()) {
+			setValueAt(p, POSSIBLE_VALUE);
+		}
 	}
 
 	public void popLastMove() {
-		Point lastPoint = mGameCore.PopMove();
-		setValueAt(lastPoint, EMPTY_VALUE);
+		mGameCore.PopMove();
+		redrawValues();
 	}
 	
 	public void nextPointSelected(Point p) {
