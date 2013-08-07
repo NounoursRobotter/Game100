@@ -63,14 +63,14 @@ public class C100GameCore
 		//
 		nextNum=2;
 		gameStyle=nbPlayer;
-		voidedPlaces = new LinkedList<Point>();
+		voidedPlaces = new List<Point>();
 		
-		playedMoves = new LinkedList<Point>();
+		playedMoves = new List<Point>();
 		//if ((startPoint.x>=0)&&(startPoint.x<boardSize.x)&&(startPoint.y>=0)&&(startPoint.y<boardSize.y))
 		if (isAllowedAsNextMove(startPoint,false)==MoveStatus.ALLOWED_OK)
 		{
 			board[startPoint.x][startPoint.y]=1;
-			playedMoves.add(new Point(startPoint));
+			playedMoves.add(startPoint.clone());
 		}
 		else
 			throw new IllegalMoveException("First move out of bound");
@@ -83,20 +83,20 @@ public class C100GameCore
 	
 	public List<Point> PossibleMoves() // Get the list of possible moves
 	{
-		Vector<Point> possibleMoves = new Vector<Point>();
+		List<Point> possibleMoves = new Vector<Point>();
 		Point lastPoint=playedMoves.get(nextNum-2);
 		
-		if ((lastPoint.x-2>=0         )&&(board[lastPoint.x-2][lastPoint.y  ]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-2,lastPoint.y  ));
-		if ((lastPoint.y-2>=0         )&&(board[lastPoint.x  ][lastPoint.y-2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x  ,lastPoint.y-2));
-		if ((lastPoint.x+2<boardSize.x)&&(board[lastPoint.x+2][lastPoint.y  ]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y  ));
-		if ((lastPoint.y+2<boardSize.y)&&(board[lastPoint.x  ][lastPoint.y+2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x  ,lastPoint.y+2));
+		if ((lastPoint.x-3>=0         )&&(board[lastPoint.x-3][lastPoint.y  ]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-3,lastPoint.y  ));
+		if ((lastPoint.y-3>=0         )&&(board[lastPoint.x  ][lastPoint.y-3]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x  ,lastPoint.y-3));
+		if ((lastPoint.x+3<boardSize.x)&&(board[lastPoint.x+3][lastPoint.y  ]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+3,lastPoint.y  ));
+		if ((lastPoint.y+3<boardSize.y)&&(board[lastPoint.x  ][lastPoint.y+3]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x  ,lastPoint.y+3));
 		
-		if ((lastPoint.x-1>=0         )&&(lastPoint.y-1>=0         )&&(board[lastPoint.x-1][lastPoint.y-1]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-1,lastPoint.y-1));
-		if ((lastPoint.x-1>=0         )&&(lastPoint.y+1<boardSize.y)&&(board[lastPoint.x-1][lastPoint.y+1]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-1,lastPoint.y+1));
-		if ((lastPoint.x+1<boardSize.x)&&(lastPoint.y+1<boardSize.y)&&(board[lastPoint.x+1][lastPoint.y+1]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+1,lastPoint.y+1));
-		if ((lastPoint.x+1<boardSize.x)&&(lastPoint.y-1>=0         )&&(board[lastPoint.x+1][lastPoint.y-1]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+1,lastPoint.y-1));
+		if ((lastPoint.x-2>=0         )&&(lastPoint.y-2>=0         )&&(board[lastPoint.x-2][lastPoint.y-2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-2,lastPoint.y-2));
+		if ((lastPoint.x-2>=0         )&&(lastPoint.y+2<boardSize.y)&&(board[lastPoint.x-2][lastPoint.y+2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-2,lastPoint.y+2));
+		if ((lastPoint.x+2<boardSize.x)&&(lastPoint.y+2<boardSize.y)&&(board[lastPoint.x+2][lastPoint.y+2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y+2));
+		if ((lastPoint.x+2<boardSize.x)&&(lastPoint.y-2>=0         )&&(board[lastPoint.x+2][lastPoint.y-2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y-2));
 		
-		return new Vector<Point>(possibleMoves);
+		return new List<Point>(possibleMoves);
 	}
 
 	
@@ -129,7 +129,7 @@ public class C100GameCore
 		
 		board[position.x][position.y]=nextNum;
 		nextNum++;
-		playedMoves.add(new Point(position));
+		playedMoves.add(position.clone());
 	}
 	
 	public boolean isWon() // Did the player win?
@@ -148,22 +148,23 @@ public class C100GameCore
 		Point lastPlayed=playedMoves.remove(nextNum-2);
 		nextNum--;
 		board[lastPlayed.x][lastPlayed.y]=NOT_PLAYED;
-		return new Point(lastPlayed);
+		return lastPlayed.clone();
 	}
 	
-	public LinkedList<Point> GetState() // Get the current state of the game  - for saving purposes
+	public List<Point> GetState() // Get the current state of the game  - for saving purposes
 	{
-		return new List<Point>(playedMoves);
+		return playedMoves.clone();
 	}
 	
 	public void SetState(List<Point> moves) throws IllegalMoveException // Set the current state of the game (the length of the table is the played moves) - for loading purposes
 	{
+		nMove=moves.clone();
 		if (nextNum!=2) throw new IllegalGameDefinition("Game's already running!");
-		moves.remove(0); // delete the first entry, used during the creation process
+		nMove.remove(0); // delete the first entry, used during the creation process
 		
 		try
 		{
-			while(!moves.isEmpty()) PushMove(moves.remove(0));
+			while(!nMove.isEmpty()) PushMove(nMove.remove(0));
 		}
 		catch(IllegalMoveException e)
 		{
@@ -191,7 +192,7 @@ public class C100GameCore
 		if( allowedStatus==ALLOWED_OCCUPIED) throw new IllegalMoveException("Occuped place");
 		
 		board[places.x][places.y]=VOIDED_PLACE;
-		voidedPlaces.add(new Point(places));
+		voidedPlaces.add(places.clone());
 	}
 	
 	public boolean CancelVoidPlace(Point places) // cancel a voided place in the grid
@@ -201,7 +202,7 @@ public class C100GameCore
 	
 	public List<Point> GetVoidPlaces() // Get the list of canceled places - for loading purposes
     {
-		return new List<Point>(voidedPlaces);
+		return voidedPlaces.clone();
 	}
 	
 	
