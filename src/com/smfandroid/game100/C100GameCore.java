@@ -42,14 +42,14 @@ public class C100GameCore
 		// matrix's initialization
 		boardSize=size;
 		if ((size.x<=4)||(size.x>=MAX_SIZE)) 
-			boardSize.x=10;
-		else
 			throw new IllegalGameDefinition("Incorrect size X definition");
+		else
+			boardSize.y=size.y;
 		
 		if ((size.y<=4)||(size.y>=MAX_SIZE))
-			boardSize.y=10;
-		else
 			throw new IllegalGameDefinition("Incorrect size Y definition");
+		else
+			boardSize.y=size.y;
 	
 		
 		board=new int[boardSize.x][boardSize.y];
