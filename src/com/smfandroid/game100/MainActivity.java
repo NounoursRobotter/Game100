@@ -19,7 +19,7 @@ public class MainActivity extends Activity {
 	public void ResetClicked(View origin) {
 		Log.i(TAG, "Reset");
 		GameGrid gmg = (GameGrid)findViewById(R.id.game_grid);
-		gmg.setSize(5, 5);
+		gmg.reset();
 	}
 
 	@Override
