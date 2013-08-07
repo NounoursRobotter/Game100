@@ -4,24 +4,30 @@ import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
-
 import android.graphics.Point;
 
 
 public class C100GameCore
 {
 	public class IllegalMoveException extends RuntimeException {
+		public IllegalMoveException(String string) { super(string); }
 		private static final long serialVersionUID = 1L; 
 	}
 	
-	public class OutsideBoardPositionException extends RuntimeException {
+	public class IllegalGameDefinition extends RuntimeException {
+		public IllegalGameDefinition(String string) { super(string); }
 		private static final long serialVersionUID = 1L; 
 	}
 	
 	
-	private static int MAX_SIZE=25;
-	private static int NOT_PLAYED=-1;
-	private static int NOT_VOIDED=-2;
+	private static final int MAX_SIZE=25;
+	private static final int NOT_PLAYED=-1;
+	private static final int VOIDED_PLACE=-2;
+	
+	public static final int ALLOWED_OK=0;
+	public static final int ALLOWED_OUTOFBOUND=1;
+	public static final int ALLOWED_OCCUPIED=2;
+	public static final int ALLOWED_SEERULES=3;
 	
 	private int board[][];
 	private int nextNum;
@@ -35,8 +41,15 @@ public class C100GameCore
 	{
 		// matrix's initialization
 		boardSize=size;
-		if ((size.x<=4)||(size.x>=MAX_SIZE)) boardSize.x=10;
-		if ((size.y<=4)||(size.y>=MAX_SIZE)) boardSize.y=10;
+		if ((size.x<=4)||(size.x>=MAX_SIZE)) 
+			boardSize.x=10;
+		else
+			throw new IllegalGameDefinition("Incorrect size X definition");
+		
+		if ((size.y<=4)||(size.y>=MAX_SIZE))
+			boardSize.y=10;
+		else
+			throw new IllegalGameDefinition("Incorrect size Y definition");
 	
 		
 		board=new int[boardSize.x][boardSize.y];
@@ -49,23 +62,21 @@ public class C100GameCore
 			}
 		}
 		
-		playedMoves = new LinkedList<Point>();
-		if ((startPoint.x>=0)&&(startPoint.x<boardSize.x)&&(startPoint.y>=0)&&(startPoint.y<boardSize.y))
-		{
-			board[startPoint.x][startPoint.y]=1;
-			playedMoves.add(startPoint);
-		}
-		else
-		{
-			board[0][0]=1;
-			playedMoves.add(new Point(0,0));
-		}
 		
 		//
 		nextNum=2;
 		gameStyle=nbPlayer;
 		voidedPlaces = new LinkedList<Point>();
 		
+		playedMoves = new LinkedList<Point>();
+		//if ((startPoint.x>=0)&&(startPoint.x<boardSize.x)&&(startPoint.y>=0)&&(startPoint.y<boardSize.y))
+		if (isAllowedAsNextMove(startPoint,false)==ALLOWED_OK)
+		{
+			board[startPoint.x][startPoint.y]=1;
+			playedMoves.add(startPoint);
+		}
+		else
+			throw new IllegalMoveException("First move out of bound");
 	}
 
 	public void finalize()
@@ -91,28 +102,28 @@ public class C100GameCore
 		return possibleMoves;
 	}
 
-	public boolean isAllowedAsNextMove(Point position) {		
-		boolean ret = true;
-		if (board[position.x][position.y]!=NOT_PLAYED) 
-			ret = false;
-		return ret;
+	public int isAllowedAsNextMove(Point position, boolean checkIfInPossibleMoves) {		
+		if ((position.x<0)||(position.y<0)||(position.x>=boardSize.x)||(position.y>=boardSize.y)) return ALLOWED_OUTOFBOUND;
+		if (board[position.x][position.y]!=NOT_PLAYED) return ALLOWED_OCCUPIED;
+		
+		// if is in possible moves list 
+		if (checkIfInPossibleMoves)
+		{
+			Vector<Point> allowedMoves = PossibleMoves();
+			if (!allowedMoves.contains(position)) return ALLOWED_SEERULES;
+		}
+		
+		return ALLOWED_OK;
 
 	}
-
-	private boolean isInsideBoardGame(Point position) {
-		boolean ret = true;
-		if ((position.x<0)||(position.y<0))
-			ret = false;
-		if((position.x>=boardSize.x)||(position.y>=boardSize.y)) 
-			ret = false;	
-		return ret;
-	}
-	
 	
 	public void PushMove(Point position) // Play a move
 	{
-		if( ! isAllowedAsNextMove(position)) throw new IllegalMoveException();
-		if( ! isInsideBoardGame(position)) throw new OutsideBoardPositionException();
+		int allowedStatus=isAllowedAsNextMove(position,true);
+		
+		if( allowedStatus==ALLOWED_OUTOFBOUND) throw new IllegalMoveException("Out of bound");
+		if( allowedStatus==ALLOWED_OCCUPIED) throw new IllegalMoveException("Occuped place");
+		if( allowedStatus==ALLOWED_SEERULES) throw new IllegalMoveException("Illegal move");
 		
 		board[position.x][position.y]=nextNum;
 		nextNum++;
@@ -121,7 +132,7 @@ public class C100GameCore
 	
 	public boolean isWon() // Did the player win?
 	{
-		if (nextNum==boardSize.x*boardSize.y) return true; //boardSize.x*boardSize.y-unplayed
+		if (nextNum-1==boardSize.x*boardSize.y-voidedPlaces.size()) return true; //boardSize.x*boardSize.y-unplayed
 		return false;
 	}
 	
@@ -143,9 +154,20 @@ public class C100GameCore
 		return playedMoves;
 	}
 	
-	public boolean SetState(List<Point> moves) // Set the current state of the game (the length of the table is the played moves) - for loading purposes
+	public void SetState(List<Point> moves) throws IllegalMoveException // Set the current state of the game (the length of the table is the played moves) - for loading purposes
 	{
-		throw new UnsupportedOperationException("Not implemented yet");
+		if (nextNum!=2) throw new IllegalGameDefinition("Game's already running!");
+		moves.remove(0); // delete the first entry, used during the creation process
+		
+		try
+		{
+			while(!moves.isEmpty()) PushMove(moves.remove(0));
+		}
+		catch(IllegalMoveException e)
+		{
+			throw e;
+			
+		}
 	}
 	
 	public List<Point> GetASolution() // if the number of free places is not too high, get a solution (gives size*size elements, 0 element if no solution found)
