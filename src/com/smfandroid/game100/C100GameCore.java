@@ -30,7 +30,7 @@ public class C100GameCore
 	private int nextNum;
 	private int gameStyle; 
 	private LinkedList<Point> playedMoves;
-	private List<Point> voidedPlaces;
+	private LinkedList<Point> voidedPlaces;
 	private Point boardSize;
 	
 	
@@ -63,9 +63,9 @@ public class C100GameCore
 		//
 		nextNum=2;
 		gameStyle=nbPlayer;
-		voidedPlaces = new List<Point>();
+		voidedPlaces = new LinkedList<Point>();
 		
-		playedMoves = new List<Point>();
+		playedMoves = new LinkedList<Point>();
 		//if ((startPoint.x>=0)&&(startPoint.x<boardSize.x)&&(startPoint.y>=0)&&(startPoint.y<boardSize.y))
 		if (isAllowedAsNextMove(startPoint,false)==MoveStatus.ALLOWED_OK)
 		{
@@ -81,7 +81,7 @@ public class C100GameCore
 		
 	}
 	
-	public List<Point> PossibleMoves() // Get the list of possible moves
+	public LinkedList<Point> PossibleMoves() // Get the list of possible moves
 	{
 		List<Point> possibleMoves = new Vector<Point>();
 		Point lastPoint=playedMoves.get(nextNum-2);
@@ -96,7 +96,7 @@ public class C100GameCore
 		if ((lastPoint.x+2<boardSize.x)&&(lastPoint.y+2<boardSize.y)&&(board[lastPoint.x+2][lastPoint.y+2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y+2));
 		if ((lastPoint.x+2<boardSize.x)&&(lastPoint.y-2>=0         )&&(board[lastPoint.x+2][lastPoint.y-2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y-2));
 		
-		return new List<Point>(possibleMoves);
+		return new LinkedList<Point>(possibleMoves);
 	}
 
 	
@@ -151,14 +151,14 @@ public class C100GameCore
 		return new Point(lastPlayed);
 	}
 	
-	public List<Point> GetState() // Get the current state of the game  - for saving purposes
+	public LinkedList<Point> GetState() // Get the current state of the game  - for saving purposes
 	{
-		return new List<Point>(playedMoves);
+		return new LinkedList<Point>(playedMoves);
 	}
 	
-	public void SetState(List<Point> moves) throws IllegalMoveException // Set the current state of the game (the length of the table is the played moves) - for loading purposes
+	public void SetState(LinkedList<Point> moves) throws IllegalMoveException // Set the current state of the game (the length of the table is the played moves) - for loading purposes
 	{
-		nMove=List<Point>(moves);
+		LinkedList<Point> nMove=new LinkedList<Point>(moves);
 		if (nextNum!=2) throw new IllegalGameDefinition("Game's already running!");
 		nMove.remove(0); // delete the first entry, used during the creation process
 		
@@ -173,12 +173,12 @@ public class C100GameCore
 		}
 	}
 	
-	public List<Point> GetASolution() // if the number of free places is not too high, get a solution (gives size*size elements, 0 element if no solution found)
+	public LinkedList<Point> GetASolution() // if the number of free places is not too high, get a solution (gives size*size elements, 0 element if no solution found)
 	{
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
-	public List<Point> TrySolutions() // randomly try to fill the grid (gives size*size elements, 0 element if no solution found)
+	public LinkedList<Point> TrySolutions() // randomly try to fill the grid (gives size*size elements, 0 element if no solution found)
     {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
@@ -186,10 +186,10 @@ public class C100GameCore
 	/* Voided areas */
 	public void SetNewVoidPlace(Point places) // void a place in the grid
     {
-		int allowedStatus=isAllowedAsNextMove(position,false);
+		MoveStatus allowedStatus=isAllowedAsNextMove(places,false);
 		
-		if( allowedStatus==ALLOWED_OUTOFBOUND) throw new IllegalMoveException("Out of bound");
-		if( allowedStatus==ALLOWED_OCCUPIED) throw new IllegalMoveException("Occuped place");
+		if( allowedStatus==MoveStatus.ALLOWED_OUTOFBOUND) throw new IllegalMoveException("Out of bound");
+		if( allowedStatus==MoveStatus.ALLOWED_OCCUPIED) throw new IllegalMoveException("Occuped place");
 		
 		board[places.x][places.y]=VOIDED_PLACE;
 		voidedPlaces.add(new Point(places));
@@ -200,9 +200,9 @@ public class C100GameCore
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
-	public List<Point> GetVoidPlaces() // Get the list of canceled places - for loading purposes
+	public LinkedList<Point> GetVoidPlaces() // Get the list of canceled places - for loading purposes
     {
-		return List<Point>(voidedPlaces);
+		return new LinkedList<Point>(voidedPlaces);
 	}
 	
 	
