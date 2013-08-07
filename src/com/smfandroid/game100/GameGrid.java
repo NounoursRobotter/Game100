@@ -1,5 +1,8 @@
 package com.smfandroid.game100;
 
+import java.util.List;
+import java.util.Random;
+
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -13,6 +16,9 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.smfandroid.game100.C100GameCore.IllegalMoveException;
 
 public class GameGrid extends LinearLayout implements OnTouchListener {
 
@@ -28,7 +34,7 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 			updateValue();
 		}
 		public void setValue(int value) {
-			if(mValue <=0)
+			if(value <=0)
 				throw new IllegalArgumentException("The value is a stricly positive integer");
 			
 			this.mValue = value;
@@ -55,7 +61,9 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 
 	private int mNbRows;
 	private int mNbColumns;
-
+	private Random mRndGenerator = new Random();
+	private C100GameCore mGameCore;
+	
 	private VelocityTracker mVelocityTracker = null;
 
 	public void setSize(int nbRows, int nbColumns) {
@@ -90,6 +98,8 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 		return row;
 	}
 
+	public final int EMPTY_VALUE = -1;
+	
 	public void reset() {
 		for(int i = 0; i < getChildCount(); i++) {
 			LinearLayout l = (LinearLayout)getChildAt(i);
@@ -97,10 +107,40 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 				((GridElement)l.getChildAt(j)).setEmptyValue();
 			}
 		}
+		Point initPoint = new Point();
+		initPoint.x = mRndGenerator.nextInt(mNbColumns);
+		initPoint.y = mRndGenerator.nextInt(mNbRows);
+
+		mGameCore = new C100GameCore(new Point(mNbRows, mNbColumns), initPoint, 1);
+		redrawValues();
 	}
 	
+	protected void setValueAt(Point position, int value) {
+		LinearLayout l = (LinearLayout)getChildAt(position.y);
+		((GridElement)l.getChildAt(position.x)).setValue(value);
+	}
+	
+	private void redrawValues() {
+		int val = 0;
+		for(Point p:mGameCore.GetState()) {
+			val += 1; 
+			setValueAt(p, val);
+		}
+	}
+
 	public void nextPointSelected(Point p) {
-		//Toast.makeText(getContext(), "Next Point : " + p.toString(), Toast.LENGTH_SHORT).show();
+		Point newPoint;
+		List<Point> lMoves = mGameCore.GetState();
+		newPoint = lMoves.get(lMoves.size()-1);
+		newPoint.x += p.x;
+		newPoint.y += p.y;
+		try {
+			mGameCore.PushMove(newPoint);
+			redrawValues();
+		} catch (IllegalMoveException e) {
+			Toast.makeText(getContext(), R.string.msg_illegal_move, Toast.LENGTH_SHORT).show();
+		}
+		
 	}
 
 	public void refreshGrid() {

@@ -3,6 +3,7 @@
 
     <string name="app_name">Game100</string>
     <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="bt_reset">Reset</string>
+    <string name="msg_illegal_move">Illegal Move</string>
 
 </resources>
