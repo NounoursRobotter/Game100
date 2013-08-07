@@ -1,15 +1,25 @@
 package com.smfandroid.game100;
 
-import android.os.Bundle;
 import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
+import android.view.View;
 
 public class MainActivity extends Activity {
 
+	protected final String TAG = getClass().getSimpleName();
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+	}
+
+	public void ResetClicked(View origin) {
+		Log.i(TAG, "Reset");
+		GameGrid gmg = (GameGrid)findViewById(R.id.game_grid);
+		gmg.reset();
 	}
 
 	@Override
