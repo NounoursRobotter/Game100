@@ -73,7 +73,7 @@ public class C100GameCore
 		if (isAllowedAsNextMove(startPoint,false)==ALLOWED_OK)
 		{
 			board[startPoint.x][startPoint.y]=1;
-			playedMoves.add(startPoint);
+			playedMoves.add(new Point(startPoint));
 		}
 		else
 			throw new IllegalMoveException("First move out of bound");
@@ -99,7 +99,7 @@ public class C100GameCore
 		if ((lastPoint.x+1<boardSize.x)&&(lastPoint.y+1<boardSize.y)&&(board[lastPoint.x+1][lastPoint.y+1]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+1,lastPoint.y+1));
 		if ((lastPoint.x+1<boardSize.x)&&(lastPoint.y-1>=0         )&&(board[lastPoint.x+1][lastPoint.y-1]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+1,lastPoint.y-1));
 		
-		return possibleMoves;
+		return new Vector<Point>(possibleMoves);
 	}
 
 	public int isAllowedAsNextMove(Point position, boolean checkIfInPossibleMoves) {		
@@ -127,7 +127,7 @@ public class C100GameCore
 		
 		board[position.x][position.y]=nextNum;
 		nextNum++;
-		playedMoves.add(position);
+		playedMoves.add(new Point(position));
 	}
 	
 	public boolean isWon() // Did the player win?
@@ -146,12 +146,12 @@ public class C100GameCore
 		Point lastPlayed=playedMoves.remove(nextNum-2);
 		nextNum--;
 		board[lastPlayed.x][lastPlayed.y]=NOT_PLAYED;
-		return lastPlayed;
+		return new Point(lastPlayed);
 	}
 	
 	public List<Point> GetState() // Get the current state of the game  - for saving purposes
 	{
-		return playedMoves;
+		return new List<Point>(playedMoves);
 	}
 	
 	public void SetState(List<Point> moves) throws IllegalMoveException // Set the current state of the game (the length of the table is the played moves) - for loading purposes
@@ -181,9 +181,15 @@ public class C100GameCore
 	}
 	
 	/* Voided areas */
-	public boolean SetNewVoidPlace(Point places) // void a place in the grid
+	public void SetNewVoidPlace(Point places) // void a place in the grid
     {
-		throw new UnsupportedOperationException("Not implemented yet");
+		int allowedStatus=isAllowedAsNextMove(position,false);
+		
+		if( allowedStatus==ALLOWED_OUTOFBOUND) throw new IllegalMoveException("Out of bound");
+		if( allowedStatus==ALLOWED_OCCUPIED) throw new IllegalMoveException("Occuped place");
+		
+		board[places.x][places.y]=VOIDED_PLACE;
+		voidedPlaces.add(new Point(places));
 	}
 	
 	public boolean CancelVoidPlace(Point places) // cancel a voided place in the grid
@@ -193,7 +199,7 @@ public class C100GameCore
 	
 	public List<Point> GetVoidPlaces() // Get the list of canceled places - for loading purposes
     {
-		throw new UnsupportedOperationException("Not implemented yet");
+		return new List<Point>(voidedPlaces);
 	}
 	
 	
