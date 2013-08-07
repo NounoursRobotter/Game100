@@ -10,14 +10,13 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
 
-    <LinearLayout
-        android:id="@+id/grid"
+    <com.smfandroid.game100.GameGrid
+        android:id="@+id/game_grid"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="100"
-        android:orientation="vertical" >
+        android:layout_weight="100" >
 
-    </LinearLayout>
+    </com.smfandroid.game100.GameGrid>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -28,6 +27,7 @@
             style="?android:attr/buttonStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:onClick="ResetClicked"
             android:text="Reset" />
 
     </LinearLayout>
