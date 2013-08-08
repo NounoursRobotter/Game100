@@ -227,25 +227,25 @@ public class GameGrid extends LinearLayout implements OnTouchListener {
 			// Clearly one direction is stronger than the other
 			if(Math.abs(x) > 2 * Math.abs(y)) {
 				if(x > 0)
-					nextPoint = new Point(2,0);
+					nextPoint = new Point(3,0);
 				else
-					nextPoint = new Point(-2,0);
+					nextPoint = new Point(-3,0);
 			} else if(Math.abs(x) < 0.5 * Math.abs(y)) {
 				if(y > 0)
-					nextPoint = new Point(0,2);
+					nextPoint = new Point(0,3);
 				else
-					nextPoint = new Point(0,-2);
+					nextPoint = new Point(0,-3);
 				// Diagonals
 			} else if(x > 0) { // X > 0
 			if(y > 0)
-				nextPoint = new Point(1,1);
+				nextPoint = new Point(2,2);
 			else
-				nextPoint = new Point(1,-1);
+				nextPoint = new Point(2,-2);
 			} else             // X < 0
 				if (y > 0)
-					nextPoint = new Point(-1,1);
+					nextPoint = new Point(-2,2);
 				else
-					nextPoint = new Point(-1,-1);
+					nextPoint = new Point(-2,-2);
 			nextPointSelected(nextPoint);
 		case MotionEvent.ACTION_CANCEL:
 			// Return a VelocityTracker object back to be re-used by others.
