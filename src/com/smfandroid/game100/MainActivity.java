@@ -37,6 +37,12 @@ public class MainActivity extends Activity implements NoticeDialogListener{
 		}
 	}
 
+	public void solveClicked(View origin) {
+		Log.i(TAG, "Solve");
+		GameGrid gmg = (GameGrid)findViewById(R.id.game_grid);
+		gmg.solveGame();
+	}
+	
 
 	public void difficultyClicked(View origin) {
 		Log.i(TAG, "difficulty");

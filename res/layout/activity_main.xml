@@ -14,7 +14,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="100" >
-
     </com.smfandroid.game100.GameGrid>
 
     <LinearLayout
@@ -24,26 +23,43 @@
         <Button
             android:id="@+id/bt_reset"
             style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:onClick="resetClicked"
             android:text="@string/bt_reset" />
 
         <Button
             android:id="@+id/bt_pop"
             style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:onClick="popClicked"
             android:text="@string/bt_pop" />
 
         <Button
             android:id="@+id/bt_difficulty"
             style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:onClick="difficultyClicked"
             android:text="@string/bt_difficulty" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <Button
+            android:id="@+id/bt_solve"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="solveClicked"
+            android:text="@string/bt_solve" />
 
     </LinearLayout>
 

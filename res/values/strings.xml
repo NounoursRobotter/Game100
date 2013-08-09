@@ -3,10 +3,13 @@
 
     <string name="app_name">Game100</string>
     <string name="action_settings">Settings</string>
+
     <string name="bt_reset">Reset</string>
-    <string name="bt_pop">Revert last move</string>
+    <string name="bt_pop">Revert</string>
+    <string name="bt_solve">Solve</string>
+    
     <string name="msg_illegal_move">Illegal Move</string>
-    <string name="msg_empty_stack">Cannot remove first move</string>
+    <string name="msg_empty_stack">Nothing to revert</string>
     
 	<string name="bt_difficulty">Difficulty</string>
     

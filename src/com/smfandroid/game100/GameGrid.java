@@ -221,4 +221,10 @@ public class GameGrid extends LinearLayout {
 		mGameCore.popMove();
 		redrawValues();
 	}
+
+	
+	public void solveGame() {
+		mGameCore.setCurrentState(mGameCore.getSolution());
+		redrawValues();
+	}
 }
