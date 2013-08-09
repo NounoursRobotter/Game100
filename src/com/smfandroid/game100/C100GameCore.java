@@ -1,5 +1,6 @@
 package com.smfandroid.game100;
 
+import java.security.acl.LastOwnerException;
 import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,8 +31,7 @@ public class C100GameCore
 	private enum MoveStatus { ALLOWED_OUTOFBOUND, ALLOWED_OCCUPIED, ALLOWED_SEERULES, ALLOWED_OK };
 	
 	private int board[][];
-	private int nextNum;
-	private int gameStyle; 
+
 	private LinkedList<Point> playedMoves;
 	private LinkedList<Point> voidedPlaces;
 	private Point boardSize;
@@ -64,8 +64,6 @@ public class C100GameCore
 			}
 		}
 
-		nextNum=1;
-		gameStyle=nbPlayer;
 		voidedPlaces = new LinkedList<Point>();
 		playedMoves = new LinkedList<Point>();
 	}
@@ -83,7 +81,6 @@ public class C100GameCore
 		for(int i = 0; i < nbVoids; i++) {
 			addVoidPlace(getRandomEmptyPosition());
 		}		
-		pushMove(getRandomEmptyPosition());
 	}
 	
 
@@ -114,6 +111,15 @@ public class C100GameCore
 			if ((lastPoint.x-2>=0         )&&(lastPoint.y+2<boardSize.y)&&(board[lastPoint.x-2][lastPoint.y+2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-2,lastPoint.y+2));
 			if ((lastPoint.x+2<boardSize.x)&&(lastPoint.y+2<boardSize.y)&&(board[lastPoint.x+2][lastPoint.y+2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y+2));
 			if ((lastPoint.x+2<boardSize.x)&&(lastPoint.y-2>=0         )&&(board[lastPoint.x+2][lastPoint.y-2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y-2));
+		} else {
+			// If board is empty, any non void cell is available !
+			for(int i = 0; i < boardSize.x; i++) {
+				for(int j = 0; j< boardSize.y; j++) {
+					Point proposition = new Point(i, j);
+					if(isAllowedAsNextMove(proposition, false) == MoveStatus.ALLOWED_OK)
+						possibleMoves.add(proposition);
+				}
+			}
 		}
 		return possibleMoves;
 	}
@@ -164,7 +170,7 @@ public class C100GameCore
 	public Point popMove() // Cancel the last move
 	{
 		
-		if (getNbPlayedMoves() <= 2)
+		if (getNbPlayedMoves() == 0)
 		{
 			throw new EmptyStackException();
 		}

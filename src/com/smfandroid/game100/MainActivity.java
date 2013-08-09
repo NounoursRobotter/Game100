@@ -1,12 +1,14 @@
 package com.smfandroid.game100;
 
+import java.util.EmptyStackException;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Toast;
 
-import com.smfandroid.game100.DifficultyDialog.Difficulty;
 import com.smfandroid.game100.DifficultyDialog.NoticeDialogListener;
 
 public class MainActivity extends Activity implements NoticeDialogListener{
@@ -22,13 +24,17 @@ public class MainActivity extends Activity implements NoticeDialogListener{
 	public void resetClicked(View origin) {
 		Log.i(TAG, "Reset");
 		GameGrid gmg = (GameGrid)findViewById(R.id.game_grid);
-		gmg.reset();
+		gmg.resetGame();
 	}
 
 	public void popClicked(View origin) {
 		Log.i(TAG, "Pop");
 		GameGrid gmg = (GameGrid)findViewById(R.id.game_grid);
-		gmg.popLastMove();
+		try {
+			gmg.popLastMove();
+		} catch(EmptyStackException e) {
+			Toast.makeText(this, R.string.msg_empty_stack, Toast.LENGTH_SHORT).show();
+		}
 	}
 
 

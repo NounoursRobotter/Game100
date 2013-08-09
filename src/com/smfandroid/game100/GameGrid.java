@@ -1,8 +1,5 @@
 package com.smfandroid.game100;
 
-import java.security.spec.MGF1ParameterSpec;
-import java.util.Random;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -14,12 +11,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.smfandroid.game100.C100GameCore.IllegalMoveException;
-import com.smfandroid.game100.DifficultyDialog.Difficulty;
-import com.smfandroid.game100.tests.GameCore;
 
 public class GameGrid extends LinearLayout {
+	
+	protected final String TAG = getClass().getSimpleName();
 
+	protected int mNbRows;
+	protected int mNbColumns;
+	protected C100GameCore mGameCore;
 
+	public final int EMPTY_VALUE = -1;
+	public final int POSSIBLE_VALUE = -2;
+	public final int VOID_VALUE = -3;
+
+	private Difficulty mCurrentDifficulty;
+	
 	protected class GridElement extends TextView {
 		protected class MyValue {
 			protected int mValue;
@@ -36,7 +42,7 @@ public class GameGrid extends LinearLayout {
 			@Override
 			public void onClick(View v) {
 				if(m.mValue == -2)
-					nextPointSelected(mPoint);
+					addNextPoint(mPoint);
 			}
 		}
 		
@@ -95,11 +101,48 @@ public class GameGrid extends LinearLayout {
 		}
 		
 	}
-	protected final String TAG = getClass().getSimpleName();
 
-	private int mNbRows;
-	private int mNbColumns;
-	private C100GameCore mGameCore;
+	
+	public GameGrid(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		this.setBackgroundColor(Color.BLACK);
+		mGameCore = new C100GameCore(new Point(10, 10), 1);
+		Difficulty initDiff = new Difficulty(10, 10, 0);
+		setDifficulty(initDiff);
+	}
+	
+	
+	public void createGridWidget() {
+		this.removeAllViews();
+
+		this.setOrientation(LinearLayout.VERTICAL);
+		LayoutParams layoutRow = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f);
+
+		for(int i = 0; i< getNbRows(); i++) {
+			this.addView(CreateRow(i), layoutRow);
+		}
+	}	
+
+	
+	private void redrawValues() {
+		for(int i = 0; i < getChildCount(); i++) {
+			LinearLayout l = (LinearLayout)getChildAt(i);
+			for(int j = 0; j< l.getChildCount(); j++) {
+				((GridElement)l.getChildAt(j)).setEmptyValue();
+			}
+		}
+		int val = 0;
+		for(Point p:mGameCore.getCurrentState()) {
+			val += 1; 
+			setValueAt(p, val);
+		}
+		for(Point p:mGameCore.possibleMoves()) {
+			setValueAt(p, POSSIBLE_VALUE);
+		}
+		for(Point p:mGameCore.getVoidPlaces()) {
+			setValueAt(p, VOID_VALUE);
+		}		
+	}
 	
 	public void setSize(int nbRows, int nbColumns) {
 		if(nbRows <= 0 || nbRows <=0)
@@ -133,87 +176,44 @@ public class GameGrid extends LinearLayout {
 		return row;
 	}
 
-	public final int EMPTY_VALUE = -1;
-	public final int POSSIBLE_VALUE = -2;
-	public final int VOID_VALUE = -3;
 	
-
-	public void reset() {
-		mGameCore.createGame(new Point(mNbRows, mNbColumns));
-		redrawValues();
-	}
-	
-
 	protected void setValueAt(Point position, int value) {
 		LinearLayout l = (LinearLayout)getChildAt(position.y);
 		GridElement gridE = (GridElement)l.getChildAt(position.x);
-		if(value == EMPTY_VALUE)
-			gridE.setEmptyValue();
-		if(value == VOID_VALUE)
-			gridE.setVoidValue();
-		else if(value == POSSIBLE_VALUE) {
-			gridE.setPossibleValue();
+		switch(value) {
+			case (EMPTY_VALUE):
+				gridE.setEmptyValue(); 
+				break;
+			case(VOID_VALUE):
+				gridE.setVoidValue(); 
+				break;
+			case (POSSIBLE_VALUE):
+				gridE.setPossibleValue();
+				break;
+			default:
+				gridE.setValue(value);
 		}
-		else			
-			gridE.setValue(value);
-	}
-	
-	private void redrawValues() {
-		for(int i = 0; i < getChildCount(); i++) {
-			LinearLayout l = (LinearLayout)getChildAt(i);
-			for(int j = 0; j< l.getChildCount(); j++) {
-				((GridElement)l.getChildAt(j)).setEmptyValue();
-			}
-		}
-		int val = 0;
-		for(Point p:mGameCore.getCurrentState()) {
-			val += 1; 
-			setValueAt(p, val);
-		}
-		for(Point p:mGameCore.possibleMoves()) {
-			setValueAt(p, POSSIBLE_VALUE);
-		}
-		for(Point p:mGameCore.getVoidPlaces()) {
-			setValueAt(p, VOID_VALUE);
-		}		
 	}
 
-
 	
-	public void nextPointSelected(Point p) {
+	public void addNextPoint(Point p) {
 		try {
 			mGameCore.pushMove(p);
 			redrawValues();
 		} catch (IllegalMoveException e) {
 			Toast.makeText(getContext(), R.string.msg_illegal_move, Toast.LENGTH_SHORT).show();
-		}
-		
+		}	
 	}
 
-	public void createGridWidget() {
-		this.removeAllViews();
-
-		this.setOrientation(LinearLayout.VERTICAL);
-		LayoutParams layoutRow = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f);
-
-		for(int i = 0; i< getNbRows(); i++) {
-			this.addView(CreateRow(i), layoutRow);
-		}
-	}	
-
-	public GameGrid(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		this.setBackgroundColor(Color.BLACK);
-		mGameCore = new C100GameCore(new Point(10, 10), 1);
-		mGameCore.autoInitGame(0);
-		setSize(10, 10);	
-		redrawValues();
-	}
+	public void resetGame() {
+		setDifficulty(mCurrentDifficulty);
+	} 
 
 	public void setDifficulty(Difficulty d) {
 		mGameCore.createGame(new Point(d.width, d.height));
 		mGameCore.autoInitGame(d.nbVoids);
 		setSize(d.height, d.width);
+		mCurrentDifficulty = d;
 		redrawValues();
 	}
 	
