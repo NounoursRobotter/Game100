@@ -1,5 +1,6 @@
 package com.smfandroid.game100;
 
+import java.security.spec.MGF1ParameterSpec;
 import java.util.Random;
 
 import android.content.Context;
@@ -13,6 +14,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.smfandroid.game100.C100GameCore.IllegalMoveException;
+import com.smfandroid.game100.DifficultyDialog.Difficulty;
+import com.smfandroid.game100.tests.GameCore;
 
 public class GameGrid extends LinearLayout {
 
@@ -40,6 +43,11 @@ public class GameGrid extends LinearLayout {
 		public int getValue() {
 			return m.mValue;
 		}
+
+		public void setVoidValue() {
+			m.mValue = -3;
+			updateValue();
+		}
 		
 		public void setEmptyValue() {
 			m.mValue = -1;
@@ -65,8 +73,11 @@ public class GameGrid extends LinearLayout {
 				setText(Integer.toString(m.mValue));
 			else
 				setText(" ");
+
 			if(m.mValue == -2)
 				setBackgroundColor(Color.GREEN);
+			else if (m.mValue == -3)
+				setBackgroundColor(Color.BLACK);
 			else
 				setBackgroundColor(Color.WHITE);
 		}
@@ -88,7 +99,6 @@ public class GameGrid extends LinearLayout {
 
 	private int mNbRows;
 	private int mNbColumns;
-	private Random mRndGenerator = new Random();
 	private C100GameCore mGameCore;
 	
 	public void setSize(int nbRows, int nbColumns) {
@@ -98,8 +108,7 @@ public class GameGrid extends LinearLayout {
 		this.mNbRows = nbRows;
 		this.mNbColumns = nbColumns;
 
-		refreshGrid();
-		reset();
+		createGridWidget();
 	}
 
 	public int getNbRows() {
@@ -126,14 +135,11 @@ public class GameGrid extends LinearLayout {
 
 	public final int EMPTY_VALUE = -1;
 	public final int POSSIBLE_VALUE = -2;
-
+	public final int VOID_VALUE = -3;
+	
 
 	public void reset() {
-		Point initPoint = new Point();
-		initPoint.x = mRndGenerator.nextInt(mNbColumns);
-		initPoint.y = mRndGenerator.nextInt(mNbRows);
-
-		mGameCore = new C100GameCore(new Point(mNbRows, mNbColumns), initPoint, 1);
+		mGameCore.createGame(new Point(mNbRows, mNbColumns));
 		redrawValues();
 	}
 	
@@ -143,6 +149,8 @@ public class GameGrid extends LinearLayout {
 		GridElement gridE = (GridElement)l.getChildAt(position.x);
 		if(value == EMPTY_VALUE)
 			gridE.setEmptyValue();
+		if(value == VOID_VALUE)
+			gridE.setVoidValue();
 		else if(value == POSSIBLE_VALUE) {
 			gridE.setPossibleValue();
 		}
@@ -165,12 +173,12 @@ public class GameGrid extends LinearLayout {
 		for(Point p:mGameCore.possibleMoves()) {
 			setValueAt(p, POSSIBLE_VALUE);
 		}
+		for(Point p:mGameCore.getVoidPlaces()) {
+			setValueAt(p, VOID_VALUE);
+		}		
 	}
 
-	public void popLastMove() {
-		mGameCore.popMove();
-		redrawValues();
-	}
+
 	
 	public void nextPointSelected(Point p) {
 		try {
@@ -182,7 +190,7 @@ public class GameGrid extends LinearLayout {
 		
 	}
 
-	public void refreshGrid() {
+	public void createGridWidget() {
 		this.removeAllViews();
 
 		this.setOrientation(LinearLayout.VERTICAL);
@@ -196,7 +204,21 @@ public class GameGrid extends LinearLayout {
 	public GameGrid(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		this.setBackgroundColor(Color.BLACK);
-		setSize(10, 10);		
+		mGameCore = new C100GameCore(new Point(10, 10), 1);
+		mGameCore.autoInitGame(0);
+		setSize(10, 10);	
+		redrawValues();
+	}
+
+	public void setDifficulty(Difficulty d) {
+		mGameCore.createGame(new Point(d.width, d.height));
+		mGameCore.autoInitGame(d.nbVoids);
+		setSize(d.height, d.width);
+		redrawValues();
 	}
 	
+	public void popLastMove() {
+		mGameCore.popMove();
+		redrawValues();
+	}
 }

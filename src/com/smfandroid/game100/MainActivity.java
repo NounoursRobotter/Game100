@@ -35,6 +35,7 @@ public class MainActivity extends Activity implements NoticeDialogListener{
 	public void difficultyClicked(View origin) {
 		Log.i(TAG, "difficulty");
 		new DifficultyDialog().show(getFragmentManager(), "DifficultyDialog");
+		
 	}
 	
 	@Override
@@ -47,6 +48,8 @@ public class MainActivity extends Activity implements NoticeDialogListener{
 	@Override
 	public void onDialogSelect(Difficulty d) {
 		Log.i(TAG, "New difficulty selected - " + d);
+		GameGrid gmg = (GameGrid)findViewById(R.id.game_grid);
+		gmg.setDifficulty(d);
 	}
 
 }

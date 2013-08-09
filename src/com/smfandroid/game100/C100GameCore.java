@@ -3,9 +3,9 @@ package com.smfandroid.game100;
 import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Vector;
+import java.util.Random;
+
 import android.graphics.Point;
-import android.util.Log;
 
 
 public class C100GameCore
@@ -20,6 +20,7 @@ public class C100GameCore
 		private static final long serialVersionUID = 1L; 
 	}
 	
+	private Random rnd = new Random();
 	
 	private static final int MAX_SIZE=25;
 	private static final int MAX_REMAIN_BEFORE_FULL_SEARCH=50;
@@ -35,9 +36,12 @@ public class C100GameCore
 	private LinkedList<Point> voidedPlaces;
 	private Point boardSize;
 	
+	public void createGame(Point boardSize) {
+		createGame(boardSize, 1);
+	}	
 	
-	public C100GameCore(Point size, Point startPoint, int nbPlayer ) // create the board of size x size with the starting point (startPoint%size,startPoint/size) in the game mode gameMode
-	{
+	public void createGame(Point size, int nbPlayer) {
+
 		// matrix's initialization
 		boardSize=size;
 		if ((size.x<=4)||(size.x>=MAX_SIZE)) 
@@ -49,7 +53,6 @@ public class C100GameCore
 			throw new IllegalGameDefinition("Incorrect size Y definition");
 		else
 			boardSize.y=size.y;
-	
 		
 		board=new int[boardSize.x][boardSize.y];
 		
@@ -60,22 +63,34 @@ public class C100GameCore
 				board[i][j]=NOT_PLAYED;	
 			}
 		}
-		
-		
-		//
-		nextNum=2;
+
+		nextNum=1;
 		gameStyle=nbPlayer;
 		voidedPlaces = new LinkedList<Point>();
-		
 		playedMoves = new LinkedList<Point>();
-		//if ((startPoint.x>=0)&&(startPoint.x<boardSize.x)&&(startPoint.y>=0)&&(startPoint.y<boardSize.y))
-		if (isAllowedAsNextMove(startPoint,false)==MoveStatus.ALLOWED_OK)
-		{
-			board[startPoint.x][startPoint.y]=1;
-			playedMoves.add(new Point(startPoint));
-		}
-		else
-			throw new IllegalMoveException("First move out of bound");
+	}
+	
+	public Point getRandomEmptyPosition() {
+		Point p = new Point();
+		do {
+			p.x = rnd.nextInt(boardSize.x);
+			p.y = rnd.nextInt(boardSize.y);
+		} while(isAllowedAsNextMove(p, false) != MoveStatus.ALLOWED_OK );
+		return p;
+	}
+	
+	public void autoInitGame(int nbVoids) {
+		for(int i = 0; i < nbVoids; i++) {
+			addVoidPlace(getRandomEmptyPosition());
+		}		
+		pushMove(getRandomEmptyPosition());
+	}
+	
+
+	
+	public C100GameCore(Point size, int nbPlayer ) // create the board of size x size with the starting point (startPoint%size,startPoint/size) in the game mode gameMode
+	{
+		createGame(size, nbPlayer);
 	}
 
 	public void finalize()
@@ -85,20 +100,22 @@ public class C100GameCore
 	
 	public LinkedList<Point> possibleMoves() // Get the list of possible moves
 	{
-		List<Point> possibleMoves = new Vector<Point>();
-		Point lastPoint=playedMoves.get(nextNum-2);
+		LinkedList<Point> possibleMoves = new LinkedList<Point>();
 		
-		if ((lastPoint.x-3>=0         )&&(board[lastPoint.x-3][lastPoint.y  ]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-3,lastPoint.y  ));
-		if ((lastPoint.y-3>=0         )&&(board[lastPoint.x  ][lastPoint.y-3]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x  ,lastPoint.y-3));
-		if ((lastPoint.x+3<boardSize.x)&&(board[lastPoint.x+3][lastPoint.y  ]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+3,lastPoint.y  ));
-		if ((lastPoint.y+3<boardSize.y)&&(board[lastPoint.x  ][lastPoint.y+3]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x  ,lastPoint.y+3));
-		
-		if ((lastPoint.x-2>=0         )&&(lastPoint.y-2>=0         )&&(board[lastPoint.x-2][lastPoint.y-2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-2,lastPoint.y-2));
-		if ((lastPoint.x-2>=0         )&&(lastPoint.y+2<boardSize.y)&&(board[lastPoint.x-2][lastPoint.y+2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-2,lastPoint.y+2));
-		if ((lastPoint.x+2<boardSize.x)&&(lastPoint.y+2<boardSize.y)&&(board[lastPoint.x+2][lastPoint.y+2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y+2));
-		if ((lastPoint.x+2<boardSize.x)&&(lastPoint.y-2>=0         )&&(board[lastPoint.x+2][lastPoint.y-2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y-2));
-		
-		return new LinkedList<Point>(possibleMoves);
+		if(getNbPlayedMoves() != 0) {
+			Point lastPoint=playedMoves.getLast();
+			
+			if ((lastPoint.x-3>=0         )&&(board[lastPoint.x-3][lastPoint.y  ]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-3,lastPoint.y  ));
+			if ((lastPoint.y-3>=0         )&&(board[lastPoint.x  ][lastPoint.y-3]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x  ,lastPoint.y-3));
+			if ((lastPoint.x+3<boardSize.x)&&(board[lastPoint.x+3][lastPoint.y  ]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+3,lastPoint.y  ));
+			if ((lastPoint.y+3<boardSize.y)&&(board[lastPoint.x  ][lastPoint.y+3]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x  ,lastPoint.y+3));
+			
+			if ((lastPoint.x-2>=0         )&&(lastPoint.y-2>=0         )&&(board[lastPoint.x-2][lastPoint.y-2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-2,lastPoint.y-2));
+			if ((lastPoint.x-2>=0         )&&(lastPoint.y+2<boardSize.y)&&(board[lastPoint.x-2][lastPoint.y+2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x-2,lastPoint.y+2));
+			if ((lastPoint.x+2<boardSize.x)&&(lastPoint.y+2<boardSize.y)&&(board[lastPoint.x+2][lastPoint.y+2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y+2));
+			if ((lastPoint.x+2<boardSize.x)&&(lastPoint.y-2>=0         )&&(board[lastPoint.x+2][lastPoint.y-2]==NOT_PLAYED)) possibleMoves.add(new Point(lastPoint.x+2,lastPoint.y-2));
+		}
+		return possibleMoves;
 	}
 
 	
@@ -123,32 +140,36 @@ public class C100GameCore
 	
 	public void pushMove(Point position) // Play a move
 	{
-		MoveStatus allowedStatus=isAllowedAsNextMove(position,true);
+		MoveStatus allowedStatus;
+		if(getNbPlayedMoves() == 0) // no number yet, everything is allowed
+			allowedStatus=isAllowedAsNextMove(position,false);
+		else
+			allowedStatus=isAllowedAsNextMove(position,true);
 		
 		if( allowedStatus == MoveStatus.ALLOWED_OUTOFBOUND) throw new IllegalMoveException("Out of bound");
 		if( allowedStatus == MoveStatus.ALLOWED_OCCUPIED) throw new IllegalMoveException("Occuped place");
 		if( allowedStatus == MoveStatus.ALLOWED_SEERULES) throw new IllegalMoveException("Illegal move");
 		
-		board[position.x][position.y]=nextNum;
-		nextNum++;
+		board[position.x][position.y]=getNbPlayedMoves();
 		playedMoves.add(new Point(position));
 	}
 	
 	public boolean isWon() // Did the player win?
 	{
-		if (nextNum-1==boardSize.x*boardSize.y-voidedPlaces.size()) return true; //boardSize.x*boardSize.y-unplayed
-		return false;
+		int actualNbElements = getNbPlayedMoves();
+		int targetNbElements = boardSize.x * boardSize.y - voidedPlaces.size();
+		return (targetNbElements == actualNbElements); 
 	}
 	
 	public Point popMove() // Cancel the last move
 	{
 		
-		if (nextNum<3)
+		if (getNbPlayedMoves() <= 2)
 		{
 			throw new EmptyStackException();
 		}
-		Point lastPlayed=playedMoves.remove(nextNum-2);
-		nextNum--;
+		
+		Point lastPlayed = playedMoves.removeLast();
 		board[lastPlayed.x][lastPlayed.y]=NOT_PLAYED;
 		return new Point(lastPlayed);
 	}
@@ -161,7 +182,7 @@ public class C100GameCore
 	public void setCurrentState(LinkedList<Point> moves) throws IllegalMoveException // Set the current state of the game (the length of the table is the played moves) - for loading purposes
 	{
 		LinkedList<Point> nMove=new LinkedList<Point>(moves);
-		if (nextNum!=2) throw new IllegalGameDefinition("Game's already running!");
+		if (getNbPlayedMoves() != 0) throw new IllegalGameDefinition("Game's already running!");
 		nMove.remove(0); // delete the first entry, used during the creation process
 		
 		try
@@ -183,9 +204,13 @@ public class C100GameCore
 	public LinkedList<Point> trySolutions() // randomly try to fill the grid (gives size*size elements, 0 element if no solution found)
     {
 		// if too much empty, stop
-		if (boardSize.x*boardSize.y-voidedPlaces.size()-nextNum+1<MAX_REMAIN_BEFORE_FULL_SEARCH) throw new IllegalMoveException("Too many empty places to test final solution");
+		int remainingMoves = boardSize.x * boardSize.y - voidedPlaces.size() - getNbPlayedMoves(); 
+		if (remainingMoves > MAX_REMAIN_BEFORE_FULL_SEARCH) 
+			throw new IllegalMoveException("Too many empty places to test final solution");
+		
+		
 		// save the current game
-		int saveNextNum=nextNum;
+		int originalSize = getNbPlayedMoves();
 		
 		//solve
 		boolean result=solve();
@@ -197,7 +222,7 @@ public class C100GameCore
 		LinkedList<Point> foundSolution=new LinkedList<Point>(playedMoves);
 		
 		//restore state
-		while (saveNextNum!=nextNum) popMove();
+		while (originalSize != getNbPlayedMoves()) popMove();
 		
 		return foundSolution;
 	}
@@ -232,8 +257,11 @@ public class C100GameCore
     {
 		MoveStatus allowedStatus=isAllowedAsNextMove(places,false);
 		
-		if( allowedStatus==MoveStatus.ALLOWED_OUTOFBOUND) throw new IllegalMoveException("Out of bound");
-		if( allowedStatus==MoveStatus.ALLOWED_OCCUPIED) throw new IllegalMoveException("Occuped place");
+		if( allowedStatus==MoveStatus.ALLOWED_OUTOFBOUND) 
+			throw new IllegalMoveException("Out of bound");
+		
+		if( allowedStatus==MoveStatus.ALLOWED_OCCUPIED) 
+			throw new IllegalMoveException("Occuped place");
 		
 		board[places.x][places.y]=VOIDED_PLACE;
 		voidedPlaces.add(new Point(places));
@@ -243,17 +271,22 @@ public class C100GameCore
     {
 		MoveStatus allowedStatus=isAllowedAsNextMove(places,false);
 		
-		if( allowedStatus==MoveStatus.ALLOWED_OUTOFBOUND) throw new IllegalMoveException("Out of bound");
-		if( board[places.x][places.y]!=VOIDED_PLACE) throw new IllegalMoveException("Not a voided place");
+		if( allowedStatus==MoveStatus.ALLOWED_OUTOFBOUND) 
+			throw new IllegalMoveException("Out of bound");
+		
+		if( board[places.x][places.y]!=VOIDED_PLACE) 
+			throw new IllegalMoveException("Not a voided place");
 		
 		board[places.x][places.y]=NOT_PLAYED;
-		if (voidedPlaces.remove(places)==false) throw new IllegalMoveException("Not a voided place...weird!!!");
+		
+		if (voidedPlaces.remove(places)==false) 
+			throw new IllegalMoveException("Not a voided place...weird!!!");
 		
 	}
 	
 	public LinkedList<Point> getVoidPlaces() // Get the list of canceled places - for loading purposes
     {
-		return new LinkedList<Point>(voidedPlaces);
+		return voidedPlaces;
 	}
 	
 	
@@ -266,6 +299,10 @@ public class C100GameCore
 	/* Monoplayer get score */
 	public float getScore()
     {
-		return nextNum-1;
-	}	
+		return getNbPlayedMoves() - 1;
+	}
+
+	public int getNbPlayedMoves() {
+		return playedMoves.size();
+	}
 }
