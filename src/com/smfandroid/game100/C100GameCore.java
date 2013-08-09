@@ -81,7 +81,7 @@ public class C100GameCore
 		
 	}
 	
-	public LinkedList<Point> PossibleMoves() // Get the list of possible moves
+	public LinkedList<Point> possibleMoves() // Get the list of possible moves
 	{
 		List<Point> possibleMoves = new Vector<Point>();
 		Point lastPoint=playedMoves.get(nextNum-2);
@@ -111,7 +111,7 @@ public class C100GameCore
 		// if is in possible moves list 
 		if (checkIfInPossibleMoves)
 		{
-			List<Point> allowedMoves = PossibleMoves();
+			List<Point> allowedMoves = possibleMoves();
 			if (!allowedMoves.contains(position)) return MoveStatus.ALLOWED_SEERULES;
 		}
 		
@@ -119,7 +119,7 @@ public class C100GameCore
 
 	}
 	
-	public void PushMove(Point position) // Play a move
+	public void pushMove(Point position) // Play a move
 	{
 		MoveStatus allowedStatus=isAllowedAsNextMove(position,true);
 		
@@ -138,7 +138,7 @@ public class C100GameCore
 		return false;
 	}
 	
-	public Point PopMove() // Cancel the last move
+	public Point popMove() // Cancel the last move
 	{
 		
 		if (nextNum<3)
@@ -151,12 +151,12 @@ public class C100GameCore
 		return new Point(lastPlayed);
 	}
 	
-	public LinkedList<Point> GetState() // Get the current state of the game  - for saving purposes
+	public LinkedList<Point> getCurrentState() // Get the current state of the game  - for saving purposes
 	{
 		return new LinkedList<Point>(playedMoves);
 	}
 	
-	public void SetState(LinkedList<Point> moves) throws IllegalMoveException // Set the current state of the game (the length of the table is the played moves) - for loading purposes
+	public void setCurrentState(LinkedList<Point> moves) throws IllegalMoveException // Set the current state of the game (the length of the table is the played moves) - for loading purposes
 	{
 		LinkedList<Point> nMove=new LinkedList<Point>(moves);
 		if (nextNum!=2) throw new IllegalGameDefinition("Game's already running!");
@@ -164,7 +164,7 @@ public class C100GameCore
 		
 		try
 		{
-			while(!nMove.isEmpty()) PushMove(nMove.remove(0));
+			while(!nMove.isEmpty()) pushMove(nMove.remove(0));
 		}
 		catch(IllegalMoveException e)
 		{
@@ -173,18 +173,18 @@ public class C100GameCore
 		}
 	}
 	
-	public LinkedList<Point> GetASolution() // if the number of free places is not too high, get a solution (gives size*size elements, 0 element if no solution found)
+	public LinkedList<Point> getSolution() // if the number of free places is not too high, get a solution (gives size*size elements, 0 element if no solution found)
 	{
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
-	public LinkedList<Point> TrySolutions() // randomly try to fill the grid (gives size*size elements, 0 element if no solution found)
+	public LinkedList<Point> trySolutions() // randomly try to fill the grid (gives size*size elements, 0 element if no solution found)
     {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
 	/* Voided areas */
-	public void SetNewVoidPlace(Point places) // void a place in the grid
+	public void addVoidPlace(Point places) // void a place in the grid
     {
 		MoveStatus allowedStatus=isAllowedAsNextMove(places,false);
 		
@@ -195,20 +195,26 @@ public class C100GameCore
 		voidedPlaces.add(new Point(places));
 	}
 	
-	public boolean CancelVoidPlace(Point places) // cancel a voided place in the grid
+	public boolean removeVoidPlace(Point places) // cancel a voided place in the grid
     {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
 	
-	public LinkedList<Point> GetVoidPlaces() // Get the list of canceled places - for loading purposes
+	public LinkedList<Point> getVoidPlaces() // Get the list of canceled places - for loading purposes
     {
 		return new LinkedList<Point>(voidedPlaces);
 	}
 	
 	
 	/* Multiplayer get score */
-	public float[] GetScore_2p()
+	public float[] getScore2p()
     {
 		throw new UnsupportedOperationException("Not implemented yet");
 	}
+	
+	/* Monoplayer get score */
+	public float getScore()
+    {
+		throw new UnsupportedOperationException("Not implemented yet");
+	}	
 }

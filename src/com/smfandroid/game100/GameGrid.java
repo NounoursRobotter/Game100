@@ -157,23 +157,23 @@ public class GameGrid extends LinearLayout {
 			}
 		}
 		int val = 0;
-		for(Point p:mGameCore.GetState()) {
+		for(Point p:mGameCore.getCurrentState()) {
 			val += 1; 
 			setValueAt(p, val);
 		}
-		for(Point p:mGameCore.PossibleMoves()) {
+		for(Point p:mGameCore.possibleMoves()) {
 			setValueAt(p, POSSIBLE_VALUE);
 		}
 	}
 
 	public void popLastMove() {
-		mGameCore.PopMove();
+		mGameCore.popMove();
 		redrawValues();
 	}
 	
 	public void nextPointSelected(Point p) {
 		try {
-			mGameCore.PushMove(p);
+			mGameCore.pushMove(p);
 			redrawValues();
 		} catch (IllegalMoveException e) {
 			Toast.makeText(getContext(), R.string.msg_illegal_move, Toast.LENGTH_SHORT).show();

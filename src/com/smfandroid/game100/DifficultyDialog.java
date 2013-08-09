@@ -38,7 +38,7 @@ public class DifficultyDialog extends DialogFragment implements DialogInterface.
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
 	
 	    Builder builder = new Builder(getActivity());
-	    builder.setTitle(R.string.pick_difficulty);
+	    //builder.setTitle(R.string.pick_difficulty);
 	    
 	    builder.setItems(R.array.difficulty, this);
 	    return builder.create();
