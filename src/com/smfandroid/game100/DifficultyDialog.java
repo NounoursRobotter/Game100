@@ -5,6 +5,7 @@ import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.res.Resources;
 import android.os.Bundle;
 
 public class DifficultyDialog extends DialogFragment implements DialogInterface.OnClickListener {
@@ -12,7 +13,7 @@ public class DifficultyDialog extends DialogFragment implements DialogInterface.
     NoticeDialogListener mListener;
 
     public interface NoticeDialogListener {
-        public void onDialogSelect(int which);
+        public void onDialogSelect(Difficulty d);
     }
 
     @Override
@@ -31,16 +32,52 @@ public class DifficultyDialog extends DialogFragment implements DialogInterface.
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
- 	   mListener.onDialogSelect(which);
+    	Resources res = getResources();
+    	int width   = getIntValue(res,  R.array.difficulty_width, which);
+    	int height  = getIntValue(res,  R.array.difficulty_height, which);
+    	int nbVoids = getIntValue(res,  R.array.difficulty_voids, which);
+    	Difficulty d = new Difficulty(width, height, nbVoids);
+    	mListener.onDialogSelect(d);
+    }
+    
+    protected int getIntValue(Resources res, int id, int num) {
+    	return res.getIntArray(id)[num];
     }
     
     @Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
-	
 	    Builder builder = new Builder(getActivity());
-	    //builder.setTitle(R.string.pick_difficulty);
-	    
-	    builder.setItems(R.array.difficulty, this);
+	    builder.setTitle(R.string.pick_difficulty);
+	    builder.setItems(R.array.difficulty_descriptions, this);
 	    return builder.create();
 	}
+
+    
+    public class Difficulty {
+
+    	public int getWidth() {
+			return width;
+		}
+
+		public int getHeight() {
+			return height;
+		}
+
+		public int getNbVoids() {
+			return nbVoids;
+		}
+		
+    	protected int width;
+    	protected int height;
+    	protected int nbVoids;
+    	
+    	public Difficulty(int width, int height, int nbVoids) {
+    		this.width = width;
+    		this.height = height;
+    		this.nbVoids = nbVoids;
+    	}
+    	
+    	public String toString() { return width + "x" + height + ", voids : " + nbVoids; }
+    	
+    }
 }

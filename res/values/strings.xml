@@ -6,5 +6,8 @@
     <string name="bt_reset">Reset</string>
     <string name="bt_pop">Revert last move</string>
     <string name="msg_illegal_move">Illegal Move</string>
-
+	<string name="bt_difficulty">Difficulty</string>
+    
+	<string name="pick_difficulty">Choose difficulty</string>
+	
 </resources>

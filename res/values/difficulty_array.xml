@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string-array name="difficulty_descriptions">
+        <item>Easy (5x5)</item>
+        <item>Normal (10x10)</item>
+        <item>Hard (10x10, 1 rock)</item>
+        <item>Impossible (10x10, 3 rock)</item>
+        <item>God Mode (10x10, 5 rock)</item>
+    </string-array>
+    
+    <integer-array name="difficulty_width">
+        <item>5</item>
+        <item>10</item>
+        <item>10</item>
+        <item>10</item>
+        <item>10</item>
+    </integer-array>
+
+    <integer-array name="difficulty_height">
+        <item>5</item>
+        <item>10</item>
+        <item>10</item>
+        <item>10</item>
+        <item>10</item>
+    </integer-array>
+
+	<integer-array name="difficulty_voids">
+        <item>0</item>
+        <item>0</item>
+        <item>1</item>
+        <item>3</item>
+        <item>5</item>
+    </integer-array>
+    
+        
+</resources>

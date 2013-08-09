@@ -36,6 +36,15 @@
             android:layout_height="wrap_content"
             android:onClick="popClicked"
             android:text="@string/bt_pop" />
+
+        <Button
+            android:id="@+id/bt_difficulty"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="difficultyClicked"
+            android:text="@string/bt_difficulty" />
+
     </LinearLayout>
 
 </LinearLayout>

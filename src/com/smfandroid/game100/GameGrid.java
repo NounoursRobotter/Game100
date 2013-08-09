@@ -99,6 +99,7 @@ public class GameGrid extends LinearLayout {
 		this.mNbColumns = nbColumns;
 
 		refreshGrid();
+		reset();
 	}
 
 	public int getNbRows() {
@@ -196,7 +197,6 @@ public class GameGrid extends LinearLayout {
 		super(context, attrs);
 		this.setBackgroundColor(Color.BLACK);
 		setSize(10, 10);		
-		reset();
 	}
 	
 }
