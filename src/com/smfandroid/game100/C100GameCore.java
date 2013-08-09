@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 import android.graphics.Point;
+import android.util.Log;
 
 
 public class C100GameCore
@@ -21,6 +22,7 @@ public class C100GameCore
 	
 	
 	private static final int MAX_SIZE=25;
+	private static final int MAX_REMAIN_BEFORE_FULL_SEARCH=50;
 	private static final int NOT_PLAYED=-1;
 	private static final int VOIDED_PLACE=-2;
 	
@@ -180,7 +182,49 @@ public class C100GameCore
 	
 	public LinkedList<Point> trySolutions() // randomly try to fill the grid (gives size*size elements, 0 element if no solution found)
     {
-		throw new UnsupportedOperationException("Not implemented yet");
+		// if too much empty, stop
+		if (boardSize.x*boardSize.y-voidedPlaces.size()-nextNum+1<MAX_REMAIN_BEFORE_FULL_SEARCH) throw new IllegalMoveException("Too many empty places to test final solution");
+		// save the current game
+		int saveNextNum=nextNum;
+		
+		//solve
+		boolean result=solve();
+		if (result==false) 
+			{
+			throw new UnsupportedOperationException("No solutions found");
+			}
+		
+		LinkedList<Point> foundSolution=new LinkedList<Point>(playedMoves);
+		
+		//restore state
+		while (saveNextNum!=nextNum) popMove();
+		
+		return foundSolution;
+	}
+	
+	private boolean solve()
+	{
+        if(isWon()) // stop condition
+        {
+            return true;
+        }
+        else
+        {
+            List<Point> nextElements = possibleMoves();
+            for(Point p: nextElements)
+            { // for every other move
+                pushMove(p);
+                if(solve())
+                {
+                	return true; // if the move end the game it is a good one
+                }
+                else
+                {
+                	popMove();   // else we just try the next
+                }
+            }
+        }
+        return false; // no move
 	}
 	
 	/* Voided areas */
@@ -195,9 +239,16 @@ public class C100GameCore
 		voidedPlaces.add(new Point(places));
 	}
 	
-	public boolean removeVoidPlace(Point places) // cancel a voided place in the grid
+	public void removeVoidPlace(Point places) // cancel a voided place in the grid
     {
-		throw new UnsupportedOperationException("Not implemented yet");
+		MoveStatus allowedStatus=isAllowedAsNextMove(places,false);
+		
+		if( allowedStatus==MoveStatus.ALLOWED_OUTOFBOUND) throw new IllegalMoveException("Out of bound");
+		if( board[places.x][places.y]!=VOIDED_PLACE) throw new IllegalMoveException("Not a voided place");
+		
+		board[places.x][places.y]=NOT_PLAYED;
+		if (voidedPlaces.remove(places)==false) throw new IllegalMoveException("Not a voided place...weird!!!");
+		
 	}
 	
 	public LinkedList<Point> getVoidPlaces() // Get the list of canceled places - for loading purposes
@@ -215,6 +266,6 @@ public class C100GameCore
 	/* Monoplayer get score */
 	public float getScore()
     {
-		throw new UnsupportedOperationException("Not implemented yet");
+		return nextNum-1;
 	}	
 }
