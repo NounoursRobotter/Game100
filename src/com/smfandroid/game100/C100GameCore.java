@@ -1,6 +1,5 @@
 package com.smfandroid.game100;
 
-import java.security.acl.LastOwnerException;
 import java.util.EmptyStackException;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +26,7 @@ public class C100GameCore
 	private static final int MAX_REMAIN_BEFORE_FULL_SEARCH=50;
 	private static final int NOT_PLAYED=-1;
 	private static final int VOIDED_PLACE=-2;
+	private static final int SOLUTION_MAXCOMPUTE=1000;
 	
 	private enum MoveStatus { ALLOWED_OUTOFBOUND, ALLOWED_OCCUPIED, ALLOWED_SEERULES, ALLOWED_OK };
 	
@@ -204,7 +204,24 @@ public class C100GameCore
 	
 	public LinkedList<Point> getSolution() // if the number of free places is not too high, get a solution (gives size*size elements, 0 element if no solution found)
 	{
-		throw new UnsupportedOperationException("Not implemented yet");
+		// save the current game
+		int originalSize = getNbPlayedMoves();
+		
+		int[] interLevel=new int[1];
+		interLevel[0]=0;
+
+		boolean result=solve(possibleMoves(),interLevel);
+		if (result==false) 
+			{
+			throw new UnsupportedOperationException("No solutions found");
+			}
+		
+		LinkedList<Point> foundSolution=new LinkedList<Point>(playedMoves);
+		
+		//restore state
+		while (originalSize != getNbPlayedMoves()) popMove();
+		
+		return foundSolution;
 	}
 	
 	public LinkedList<Point> trySolutions() // randomly try to fill the grid (gives size*size elements, 0 element if no solution found)
@@ -233,6 +250,7 @@ public class C100GameCore
 		return foundSolution;
 	}
 	
+	// Simon's version: used for solution finder: trySolutions()
 	private boolean solve()
 	{
         if(isWon()) // stop condition
@@ -257,6 +275,61 @@ public class C100GameCore
         }
         return false; // no move
 	}
+	
+	// Remy's version: used for solution finder: getSolution()
+	@SuppressWarnings("null")
+	private boolean solve(List<Point> nextElements, int[] interLevel)
+	{
+		interLevel[0]++;
+		if (interLevel[0]>SOLUTION_MAXCOMPUTE) return false;
+		
+		List<List<Point>> nextElemConnex = null;
+		List<Point> SimonShouldNotLookAtThis;
+		int minVal;
+		List<Point> elemMin = null;
+		
+		for(Point p: nextElements)
+		{
+			pushMove(p);
+			SimonShouldNotLookAtThis=possibleMoves();
+			SimonShouldNotLookAtThis.add(p);
+			nextElemConnex.add(SimonShouldNotLookAtThis);
+			popMove();
+		}
+		// tant que la liste n'est pas vide
+		while (!nextElemConnex.isEmpty())
+		{
+			minVal=100;
+			// On prend le minimum de la liste,
+			for (List<Point> elem: nextElemConnex)
+			{
+				if (minVal>elem.size())
+				{
+					minVal=elem.size();
+					elemMin=elem;
+				}
+			}
+			// On le vire de la liste
+			nextElemConnex.remove(elemMin);
+		
+			// on le joue
+			pushMove(elemMin.remove(elemMin.size()));
+			
+			// si sa connexité est nulle (=1 à cause du SimonShouldNotLookAtThis.add(p);)
+			if (minVal==1)
+			{	
+		    	return isWon();
+			}
+			
+			// sinon on reprend
+			if (solve(elemMin,interLevel))
+			{
+				return true;
+			}			 
+		}
+		return false;
+
+	    }
 	
 	/* Voided areas */
 	public void addVoidPlace(Point places) // void a place in the grid
@@ -308,7 +381,8 @@ public class C100GameCore
 		return getNbPlayedMoves() - 1;
 	}
 
-	public int getNbPlayedMoves() {
+	public int getNbPlayedMoves()
+	{
 		return playedMoves.size();
 	}
 }
