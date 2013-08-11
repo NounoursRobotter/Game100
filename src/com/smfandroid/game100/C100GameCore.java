@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import android.graphics.Point;
+import android.util.Log;
 
 
 public class C100GameCore
@@ -36,11 +37,13 @@ public class C100GameCore
 	private LinkedList<Point> voidedPlaces;
 	private Point boardSize;
 	
-	public void createGame(Point boardSize) {
+	public void createGame(Point boardSize)
+	{
 		createGame(boardSize, 1);
 	}	
 	
-	public void createGame(Point size, int nbPlayer) {
+	public void createGame(Point size, int nbPlayer)
+	{
 
 		// matrix's initialization
 		boardSize=size;
@@ -68,7 +71,8 @@ public class C100GameCore
 		playedMoves = new LinkedList<Point>();
 	}
 	
-	public Point getRandomEmptyPosition() {
+	public Point getRandomEmptyPosition()
+	{
 		Point p = new Point();
 		do {
 			p.x = rnd.nextInt(boardSize.x);
@@ -77,13 +81,12 @@ public class C100GameCore
 		return p;
 	}
 	
-	public void autoInitGame(int nbVoids) {
+	public void autoInitGame(int nbVoids)
+	{
 		for(int i = 0; i < nbVoids; i++) {
 			addVoidPlace(getRandomEmptyPosition());
 		}		
 	}
-	
-
 	
 	public C100GameCore(Point size, int nbPlayer ) // create the board of size x size with the starting point (startPoint%size,startPoint/size) in the game mode gameMode
 	{
@@ -124,7 +127,6 @@ public class C100GameCore
 		return possibleMoves;
 	}
 
-	
 	public MoveStatus isAllowedAsNextMove(Point position, boolean checkIfInPossibleMoves) {		
 		if (
 				(position.x<0)||(position.y<0) ||
@@ -156,8 +158,8 @@ public class C100GameCore
 		if( allowedStatus == MoveStatus.ALLOWED_OCCUPIED) throw new IllegalMoveException("Occuped place");
 		if( allowedStatus == MoveStatus.ALLOWED_SEERULES) throw new IllegalMoveException("Illegal move");
 		
-		board[position.x][position.y]=getNbPlayedMoves();
 		playedMoves.add(new Point(position));
+		board[position.x][position.y]=getNbPlayedMoves();
 	}
 	
 	public boolean isWon() // Did the player win?
@@ -188,9 +190,15 @@ public class C100GameCore
 	public void setCurrentState(LinkedList<Point> moves) throws IllegalMoveException // Set the current state of the game (the length of the table is the played moves) - for loading purposes
 	{
 		LinkedList<Point> nMove=new LinkedList<Point>(moves);
-		if (getNbPlayedMoves() != 0) throw new IllegalGameDefinition("Game's already running!");
-		nMove.remove(0); // delete the first entry, used during the creation process
 		
+		// These two lines were commented becauses Simon uses this fonction like a monkey
+		//if (getNbPlayedMoves() != 0) throw new IllegalGameDefinition("Game's already running!");
+		//nMove.remove(0); // delete the first entry, used during the creation process
+		
+		// reset game
+		while(!playedMoves.isEmpty()) popMove();
+		
+		//play game
 		try
 		{
 			while(!nMove.isEmpty()) pushMove(nMove.remove(0));
@@ -209,13 +217,20 @@ public class C100GameCore
 		
 		int[] interLevel=new int[1];
 		interLevel[0]=0;
-
+		
+		
+		
 		boolean result=solve(possibleMoves(),interLevel);
 		if (result==false) 
 			{
 			throw new UnsupportedOperationException("No solutions found");
+			//Log.i("Game100Debug", "No Solution!");
 			}
 		
+		for (Point elem: playedMoves)
+		{
+			Log.i("Game100Debug", "Final: X="+Integer.toString(elem.x)+" Y="+Integer.toString(elem.y)+ " Board at: "+ board[elem.x][elem.y]);
+		}
 		LinkedList<Point> foundSolution=new LinkedList<Point>(playedMoves);
 		
 		//restore state
@@ -277,16 +292,18 @@ public class C100GameCore
 	}
 	
 	// Remy's version: used for solution finder: getSolution()
-	@SuppressWarnings("null")
 	private boolean solve(List<Point> nextElements, int[] interLevel)
 	{
 		interLevel[0]++;
 		if (interLevel[0]>SOLUTION_MAXCOMPUTE) return false;
 		
-		List<List<Point>> nextElemConnex = null;
-		List<Point> SimonShouldNotLookAtThis;
+		Log.i("Game100Debug", "interLevel[0]="+Integer.toString(interLevel[0]));
+		
+		List<List<Point>> nextElemConnex = new LinkedList<List<Point>>();
+		List<Point> SimonShouldNotLookAtThis= new LinkedList<Point>();
 		int minVal;
-		List<Point> elemMin = null;
+		Point played;
+		List<Point> elemMin = new LinkedList<Point>();
 		
 		for(Point p: nextElements)
 		{
@@ -296,6 +313,8 @@ public class C100GameCore
 			nextElemConnex.add(SimonShouldNotLookAtThis);
 			popMove();
 		}
+		//Log.i("Game100Debug", "nextElemConnex.size()="+Integer.toString(nextElemConnex.size()));
+		
 		// tant que la liste n'est pas vide
 		while (!nextElemConnex.isEmpty())
 		{
@@ -309,11 +328,19 @@ public class C100GameCore
 					elemMin=elem;
 				}
 			}
+			
 			// On le vire de la liste
 			nextElemConnex.remove(elemMin);
-		
+			
+//			Log.i("Game100Debug", "minConnect="+Integer.toString(minVal));
+//			for (Point elem: elemMin)
+//			{
+//				Log.i("Game100Debug", "elem: X="+Integer.toString(elem.x)+" Y="+Integer.toString(elem.y));
+//			}
+
+			played=elemMin.remove(elemMin.size()-1);
 			// on le joue
-			pushMove(elemMin.remove(elemMin.size()));
+			pushMove(played);
 			
 			// si sa connexité est nulle (=1 à cause du SimonShouldNotLookAtThis.add(p);)
 			if (minVal==1)
@@ -325,7 +352,9 @@ public class C100GameCore
 			if (solve(elemMin,interLevel))
 			{
 				return true;
-			}			 
+			}
+			popMove();
+			
 		}
 		return false;
 

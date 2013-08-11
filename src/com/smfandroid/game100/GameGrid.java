@@ -223,8 +223,16 @@ public class GameGrid extends LinearLayout {
 	}
 
 	
-	public void solveGame() {
+	public void solveGame() throws UnsupportedOperationException {
+		try
+		{
 		mGameCore.setCurrentState(mGameCore.getSolution());
 		redrawValues();
+		}
+		catch (UnsupportedOperationException e)
+		{
+			redrawValues();
+			Toast.makeText(getContext(), R.string.msg_illegal_move, Toast.LENGTH_SHORT).show();
+		}
 	}
 }
