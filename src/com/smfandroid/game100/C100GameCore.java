@@ -219,18 +219,29 @@ public class C100GameCore
 		interLevel[0]=0;
 		
 		
+		boolean result=false;
+		//solve
+		interLevel[0]=SOLUTION_MAXCOMPUTE;
 		
-		boolean result=solve(possibleMoves(),interLevel);
+		List<Point> listMoves = possibleMoves();
+		pushMove(listMoves.get(0));
+		while ((result==false)&&(interLevel[0]>=SOLUTION_MAXCOMPUTE-1)&&(!listMoves.isEmpty()))
+		{
+			popMove();
+			pushMove(listMoves.remove(0));
+			interLevel[0]=0;
+			result=solve(possibleMoves(),interLevel);
+			Log.i("Game100Debug", "result "+Boolean.toString(result)+ " interLevel "+Integer.toString(interLevel[0])+ " fin list "+Boolean.toString(listMoves.isEmpty()));
+		}
 		if (result==false) 
 			{
 			throw new UnsupportedOperationException("No solutions found");
-			//Log.i("Game100Debug", "No Solution!");
 			}
 		
-		for (Point elem: playedMoves)
-		{
-			Log.i("Game100Debug", "Final: X="+Integer.toString(elem.x)+" Y="+Integer.toString(elem.y)+ " Board at: "+ board[elem.x][elem.y]);
-		}
+//		for (Point elem: playedMoves)
+//		{
+//			Log.i("Game100Debug", "Final: X="+Integer.toString(elem.x)+" Y="+Integer.toString(elem.y)+ " Board at: "+ board[elem.x][elem.y]);
+//		}
 		LinkedList<Point> foundSolution=new LinkedList<Point>(playedMoves);
 		
 		//restore state
@@ -252,6 +263,8 @@ public class C100GameCore
 		
 		//solve
 		boolean result=solve();
+		
+		// si on a atteint le niveau maximal 
 		if (result==false) 
 			{
 			throw new UnsupportedOperationException("No solutions found");
@@ -292,12 +305,11 @@ public class C100GameCore
 	}
 	
 	// Remy's version: used for solution finder: getSolution()
+	//
 	private boolean solve(List<Point> nextElements, int[] interLevel)
 	{
 		interLevel[0]++;
 		if (interLevel[0]>SOLUTION_MAXCOMPUTE) return false;
-		
-		Log.i("Game100Debug", "interLevel[0]="+Integer.toString(interLevel[0]));
 		
 		List<List<Point>> nextElemConnex = new LinkedList<List<Point>>();
 		List<Point> SimonShouldNotLookAtThis= new LinkedList<Point>();
@@ -332,20 +344,17 @@ public class C100GameCore
 			// On le vire de la liste
 			nextElemConnex.remove(elemMin);
 			
-//			Log.i("Game100Debug", "minConnect="+Integer.toString(minVal));
-//			for (Point elem: elemMin)
-//			{
-//				Log.i("Game100Debug", "elem: X="+Integer.toString(elem.x)+" Y="+Integer.toString(elem.y));
-//			}
-
 			played=elemMin.remove(elemMin.size()-1);
 			// on le joue
 			pushMove(played);
 			
 			// si sa connexité est nulle (=1 à cause du SimonShouldNotLookAtThis.add(p);)
 			if (minVal==1)
-			{	
-		    	return isWon();
+			{
+				boolean retVal=isWon();
+				if (!retVal) popMove();
+				//if (!retVal) Log.i("Game100Debug", "Return back");
+		    	return retVal;
 			}
 			
 			// sinon on reprend
